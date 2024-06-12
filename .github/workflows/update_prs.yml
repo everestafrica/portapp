@@ -1,0 +1,39 @@
+name: Update PRs in Port
+
+on:
+  schedule:
+    - cron: '0 * * * *' # Runs every hour
+
+jobs:
+  update-prs:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Get open PR count
+      id: pr-count
+      run: |
+        PR_COUNT=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          "https://api.github.com/repos/${{ github.repository }}/pulls?state=open" | jq '. | length')
+        echo "::set-output name=count::$PR_COUNT"
+
+    - name: Update Port with PR count
+      run: |
+        curl -X POST "https://api.getport.io/v1/entities/service/${{ github.repository }}" \
+        -H "Authorization: Bearer ${{ secrets.PORT_API_TOKEN }}" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "properties": {
+            "openPRs": ${{ steps.pr-count.outputs.count }}
+          }
+        }'
