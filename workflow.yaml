@@ -1,7 +1,7 @@
 on:
     workflow_dispatch:
     schedule:
-        - cron: "0 */1 * * *" # Determines the scheduled interval for this workflow. This example runs every hour.
+        - cron: "*/2 * * * *" # Determines the scheduled interval for this workflow. This example runs every hour.
 
 jobs:
     run-integration:
@@ -16,6 +16,6 @@ jobs:
                   port_client_secret: ${{ secrets.PORT_CLIENT_SECRET }}
                   port_base_url: "https://api.getport.io"
                   config: |
-                      jira_host: "https://testing-port.atlassian.net/"
+                      jira_host: "https://testing-port.atlassian.net"
                       atlassian_user_email: ${{ secrets.atlassianUserEmail }}
                       atlassian_user_token: ${{ secrets.atlassianUserToken }}
