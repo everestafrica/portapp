@@ -1,8 +1,9 @@
 name: Update PRs in Port
 
-on:
-  schedule:
-    - cron: '0 * * * *' # Runs every hour
+on: 
+    workflow_dispatch:
+    schedule:
+        - cron: "0 */1 * * *"
 
 jobs:
   update-prs:
