@@ -38,13 +38,3 @@ jobs:
             "openPRs": '${{ env.PR_COUNT }}'
           }
         }'
-    - name: Update Port with PR count
-      run: |
-        curl -X POST "https://api.getport.io/v1/entities/service/${{ github.repository }}" \
-        -H "Authorization: Bearer ${{ secrets.PORT_API_TOKEN }}" \
-        -H "Content-Type: application/json" \
-        -d '{
-          "properties": {
-            "openPRs": ${{ steps.pr-count.outputs.count }}
-          }
-        }'
