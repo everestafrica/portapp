@@ -11,12 +11,12 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Set up Node.js
-      uses: actions/setup-node@v2
+      uses: actions/setup-node@v3
       with:
-        node-version: '14'
+        node-version: '20'
 
     - name: Install dependencies
       run: npm install
@@ -24,10 +24,20 @@ jobs:
     - name: Get open PR count
       id: pr-count
       run: |
-        PR_COUNT=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+        PR_COUNT=$(curl -s -H "Authorization: token ${{ secrets.MY_PAT_TOKEN }}" \
           "https://api.github.com/repos/${{ github.repository }}/pulls?state=open" | jq '. | length')
-        echo "::set-output name=count::$PR_COUNT"
+        echo "PR_COUNT=$PR_COUNT" >> $GITHUB_ENV
 
+    - name: Update Port with PR count
+      run: |
+        curl -X POST "https://api.getport.io/v1/entities/service/${{ github.repository }}" \
+        -H "Authorization: Bearer ${{ secrets.PORT_API_TOKEN }}" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "properties": {
+            "openPRs": '${{ env.PR_COUNT }}'
+          }
+        }'
     - name: Update Port with PR count
       run: |
         curl -X POST "https://api.getport.io/v1/entities/service/${{ github.repository }}" \
