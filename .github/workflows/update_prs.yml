@@ -1,9 +1,9 @@
 name: Update PRs in Port
 
-on: 
-    workflow_dispatch:
-    schedule:
-        - cron: "0 */6 * * *"
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 */6 * * *"
 
 jobs:
   update-prs:
@@ -16,10 +16,10 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '20'
+        node-version: 20  
 
     - name: Install dependencies
-      run: npm install
+      run: npm ci  # Use 'npm ci' instead of 'npm install' for a clean installation
 
     - name: Get open PR count
       id: pr-count
@@ -37,4 +37,4 @@ jobs:
           "properties": {
             "openPRs": '${{ env.PR_COUNT }}'
           }
-        }'
+        }
