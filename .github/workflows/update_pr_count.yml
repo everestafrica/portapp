@@ -2,7 +2,7 @@ name: Update Open PRs in Port
 on:
   workflow_dispatch:  # Allow manual triggering
   schedule:
-    - cron: '0 * * * *'  # Run every hour (fixed the syntax)
+    - cron: '* */6 * * *'  # Run every hour (fixed the syntax)
 
 jobs:
   update-open-prs:
@@ -21,6 +21,7 @@ jobs:
         run: |
           REPO_NAME="${GITHUB_REPOSITORY#*/}"
           BLUEPRINT_IDENTIFIER="repository"
+          OPEN_PR_COUNT="open_pr_count"
           
           # Prepare JSON data
           JSON_DATA=$(cat <<EOF
@@ -36,8 +37,8 @@ jobs:
           )
 
           # Send request to Port
-          curl --request POST \
-               --url "https://api.getport.io/v1/blueprints/$BLUEPRINT_IDENTIFIER/entities" \
+          curl --request PATCH \
+               --url "https://api.getport.io/v1/blueprints/$BLUEPRINT_IDENTIFIER/entities/$OPEN_PR_COUNT" \
                --header "Authorization: ${{ secrets.PORT_API_TOKEN }}" \
                --header "Content-Type: application/json" \
                --data "$JSON_DATA"
