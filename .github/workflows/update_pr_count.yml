@@ -1,9 +1,8 @@
 name: Update Open PRs in Port
-
 on:
   workflow_dispatch:  # Allow manual triggering
   schedule:
-    - cron: '0 * * * *'  # Run every hour
+    - cron: '0 * * * *'  # Run every hour (fixed the syntax)
 
 jobs:
   update-open-prs:
@@ -14,22 +13,33 @@ jobs:
         run: |
           PR_COUNT=$(curl -s -H "Authorization: token ${{ secrets.MY_PAT_TOKEN }}" \
           "https://api.github.com/repos/${{ github.repository }}/pulls?state=open" | jq '. | length')
-          echo "PR_COUNT=$PR_COUNT" >> $GITHUB_ENV
+          echo "PR_COUNT=$PR_COUNT" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.MY_PAT_TOKEN }}
 
       - name: Update Port Entity
         run: |
           REPO_NAME="${GITHUB_REPOSITORY#*/}"
+          BLUEPRINT_IDENTIFIER="repository"
+          
+          # Prepare JSON data
+          JSON_DATA=$(cat <<EOF
+          {
+            "identifier": "$REPO_NAME",
+            "title": "$REPO_NAME",
+            "properties": {
+              "open_pr_count": $PR_COUNT
+            },
+            "relations": {}
+          }
+          EOF
+          )
+
+          # Send request to Port
           curl --request POST \
-               --url "https://api.getport.io/v1/blueprints/repository/entities/$REPO_NAME" \
-               --header "Authorization: Bearer ${{ secrets.PORT_API_TOKEN }}" \
+               --url "https://api.getport.io/v1/blueprints/$BLUEPRINT_IDENTIFIER/entities" \
+               --header "Authorization: ${{ secrets.PORT_API_TOKEN }}" \
                --header "Content-Type: application/json" \
-               --data '{
-                 "properties": {
-                   "open_pr_count": ${{ steps.count_prs.outputs.pr_count }}
-                 }
-               }'
+               --data "$JSON_DATA"
         env:
-          PORT_CLIENT_ID: ${{ secrets.PORT_CLIENT_ID }}
-          PORT_CLIENT_SECRET: ${{ secrets.PORT_CLIENT_SECRET }}
+          PR_COUNT: ${{ steps.count_prs.outputs.PR_COUNT }}
