@@ -1,0 +1,35 @@
+name: Update Open PRs in Port
+
+on:
+  workflow_dispatch:  # Allow manual triggering
+  schedule:
+    - cron: '0 * * * *'  # Run every hour
+
+jobs:
+  update-open-prs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Count open PRs
+        id: count_prs
+        run: |
+          PR_COUNT=$(gh pr list --json number --jq length)
+          echo "Open PRs: $PR_COUNT"
+          echo "pr_count=$PR_COUNT" >> $GITHUB_OUTPUT
+        env:
+          GITHUB_TOKEN: ${{ secrets.MY_PAT_TOKEN }}
+
+      - name: Update Port Entity
+        run: |
+          REPO_NAME="${GITHUB_REPOSITORY#*/}"
+          curl --request POST \
+               --url "https://api.getport.io/v1/blueprints/repository/entities/$REPO_NAME" \
+               --header "Authorization: Bearer ${{ secrets.PORT_API_TOKEN }}" \
+               --header "Content-Type: application/json" \
+               --data '{
+                 "properties": {
+                   "open_pr_count": ${{ steps.count_prs.outputs.pr_count }}
+                 }
+               }'
+        env:
+          PORT_CLIENT_ID: ${{ secrets.PORT_CLIENT_ID }}
+          PORT_CLIENT_SECRET: ${{ secrets.PORT_CLIENT_SECRET }}
