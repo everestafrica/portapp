@@ -21,7 +21,7 @@ jobs:
         run: |
           REPO_NAME="${GITHUB_REPOSITORY#*/}"
           BLUEPRINT_IDENTIFIER="repository"
-          OPEN_PR_COUNT="open_pr_count"
+          OPEN_PR_COUNT="portapp"
           
           # Prepare JSON data
           JSON_DATA=$(cat <<EOF
