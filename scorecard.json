@@ -1,0 +1,98 @@
+{
+  "identifier": "PRTracking",
+  "title": "PR Tracking",
+  "levels": [
+    {
+      "color": "paleBlue",
+      "title": "Basic"
+    },
+    {
+      "color": "bronze",
+      "title": "Bronze"
+    },
+    {
+      "color": "silver",
+      "title": "Silver"
+    },
+    {
+      "color": "gold",
+      "title": "Gold"
+    },
+    {
+      "color": "yellow",
+      "title": "Yellow"
+    }
+  ],
+  "rules": [
+    {
+      "identifier": "lessThan5PRs",
+      "title": "Less than 5 PRs",
+      "level": "Gold",
+      "query": {
+        "combinator": "and",
+        "conditions": [
+          {
+            "operator": "<",
+            "property": "$identifier",
+            "value": 5
+          }
+        ]
+      }
+    },
+    {
+      "identifier": "lessThan10PRs",
+      "title": "Less than 10 PRs",
+      "level": "Silver",
+      "query": {
+        "combinator": "and",
+        "conditions": [
+          {
+            "operator": ">=",
+            "property": "$identifier",
+            "value": 5
+          },
+          {
+            "operator": "<",
+            "property": "$identifier",
+            "value": 10
+          }
+        ]
+      }
+    },
+    {
+      "identifier": "lessThan15PRs",
+      "title": "Less than 15 PRs",
+      "level": "Bronze",
+      "query": {
+        "combinator": "and",
+        "conditions": [
+          {
+            "operator": ">=",
+            "property": "$identifier",
+            "value": 10
+          },
+          {
+            "operator": "<",
+            "property": "$identifier",
+            "value": 15
+          }
+        ]
+      }
+    },
+    {
+      "identifier": "moreThan15PRs",
+      "title": "More than 15 PRs",
+      "level": "Yellow",
+      "query": {
+        "combinator": "and",
+        "conditions": [
+          {
+            "operator": ">",
+            "property": "$identifier",
+            "value": 15
+          }
+        ]
+      }
+    }
+  ]
+}
