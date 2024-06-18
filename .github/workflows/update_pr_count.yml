@@ -17,19 +17,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.MY_PAT_TOKEN }}
 
-      - name: Get access token
-        run: |
-          access_token=$(curl --location --request POST 'https://api.getport.io/v1/auth/access_token' --header 'Content-Type: application/json' --data-raw '{
-          "clientId": "yzmbLEy9Ufs5sNdpuFXMLkE6zMHegUr7",
-          "clientSecret": "R5p3elPBwU0uvpJSmt1QFx83BPFAFvq0Rw84sDIthwWHNvQb7Y7PL5qoazlyOKMD"
-          }' | jq -r '.accessToken')
-
       - name: Update Port Entity
         run: |
           REPO_NAME="${GITHUB_REPOSITORY#*/}"
           BLUEPRINT_IDENTIFIER="repository"
           OPEN_PR_COUNT="portapp"
-
+          
           # Prepare JSON data
           JSON_DATA=$(cat <<EOF
           {
@@ -44,9 +37,9 @@ jobs:
           )
 
           # Send request to Port
-          curl --location --request PATCH \
+          curl --request PATCH \
                --url "https://api.getport.io/v1/blueprints/$BLUEPRINT_IDENTIFIER/entities/$OPEN_PR_COUNT" \
-               --header "Authorization: Bearer $access_token" \
+               --header "Authorization: ${{ secrets.PORT_API_TOKEN }}" \
                --header "Content-Type: application/json" \
                --data "$JSON_DATA"
         env:
