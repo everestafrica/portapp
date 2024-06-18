@@ -46,7 +46,7 @@ jobs:
           # Send request to Port
           curl --location --request PATCH \
                --url "https://api.getport.io/v1/blueprints/$BLUEPRINT_IDENTIFIER/entities/$OPEN_PR_COUNT" \
-               --header "Authorization: $access_token" \
+               --header "Authorization: Bearer $access_token" \
                --header "Content-Type: application/json" \
                --data "$JSON_DATA"
         env:
