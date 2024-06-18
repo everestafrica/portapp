@@ -20,9 +20,9 @@ jobs:
       - name: Get access token
         run: |
           access_token=$(curl --location --request POST 'https://api.getport.io/v1/auth/access_token' --header 'Content-Type: application/json' --data-raw '{
-            "clientId": ${{secrets.PORT_CLIENT_ID}},
-            "clientSecret": ${{secrets.PORT_CLIENT_SECRET}}
-          }' | jq '.accessToken' | sed 's/"//g')
+          "clientId": "yzmbLEy9Ufs5sNdpuFXMLkE6zMHegUr7",
+          "clientSecret": "R5p3elPBwU0uvpJSmt1QFx83BPFAFvq0Rw84sDIthwWHNvQb7Y7PL5qoazlyOKMD"
+          }' | jq -r '.accessToken')
 
       - name: Update Port Entity
         run: |
