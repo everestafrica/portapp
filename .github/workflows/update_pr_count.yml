@@ -1,8 +1,8 @@
-name: Update Open PRs in matching repository entity
+name: Update Open PRs in matching repository entity 
 on:
   workflow_dispatch:  # Allow manual triggering
   schedule:
-    - cron: '* */6 * * *'
+    - cron: '* */6 * * *'  
 
 jobs:
   update-open-prs:
@@ -11,7 +11,7 @@ jobs:
       - name: Count open PRs
         id: count_prs
         run: |
-          PR_COUNT=$(curl -s -H "Authorization: token ${{ secrets.MY_PAT_TOKEN }}"
+          PR_COUNT=$(curl -s -H "Authorization: token ${{ secrets.MY_PAT_TOKEN }}" \
           "https://api.github.com/repos/${{ github.repository }}/pulls?state=open" | jq '. | length')
           echo "PR_COUNT=$PR_COUNT" >> $GITHUB_OUTPUT
         env:
