@@ -39,5 +39,5 @@ jobs:
         blueprint: repository
         properties: |
           {
-            "open_pr_count": "${{ steps.get-pr-count.outputs.pr_count }}"
+            "open_pr_count": ${{ steps.get-pr-count.outputs.pr_count }}
           }
