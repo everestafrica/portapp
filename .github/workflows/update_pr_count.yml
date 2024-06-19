@@ -22,8 +22,26 @@ jobs:
         pr_count=$(gh pr list --json number | jq '. | length')
         echo "pr_count=${pr_count}" >> $GITHUB_ENV
         echo "::set-output name=pr_count::${pr_count}"
+      env:
+        GITHUB_TOKEN: ${{ secrets.MY_PAT_TOKEN }}
+        GH_TOKEN: ${{ github.token }}
 
     - name: Use PR count
       run: echo "There are ${{ env.pr_count }} open pull requests."
       env:
         GITHUB_TOKEN: ${{ secrets.MY_PAT_TOKEN }}
+        GH_TOKEN: ${{ github.token }}
+
+    - name: Update Port Entity
+      uses: port-labs/port-github-action@v1
+      with:
+        clientId: ${{ secrets.CLIENT_ID }}
+        clientSecret: ${{ secrets.CLIENT_SECRET }}
+        operation: UPSERT
+        identifier: portapp
+        title: portapp
+        blueprint: repository
+        properties: |
+          {
+            "open_pr_count": "${{ steps.get-pr-count.outputs.pr_count }}"
+          }
