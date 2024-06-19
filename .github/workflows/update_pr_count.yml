@@ -37,7 +37,7 @@ jobs:
         identifier: portapp
         title: portapp
         blueprint: repository
-        properties: |
+        properties: |-
           {
             "open_pr_count": ${{ steps.get-pr-count.outputs.pr_count }}
           }
