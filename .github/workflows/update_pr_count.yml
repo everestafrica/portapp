@@ -5,42 +5,39 @@ on:
     - cron: '* */6 * * *'  
 
 jobs:
-  update-open-prs:
+  count-prs:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Count open PRs
-        id: count_prs
-        run: |
-          PR_COUNT=$(curl -s -H "Authorization: token ${{ secrets.MY_PAT_TOKEN }}" \
-          "https://api.github.com/repos/${{ github.repository }}/pulls?state=open" | jq '. | length')
-          echo "PR_COUNT=$PR_COUNT" >> $GITHUB_OUTPUT
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Install jq
+      run: sudo apt-get install -y jq
+
+    - name: Get PR count
+      id: get-pr-count
+      run: |
+        pr_count=$(gh pr list --json number | jq '. | length')
+        echo "pr_count=${pr_count}" >> $GITHUB_ENV
+
+    - name: Use PR count
+      run: echo "There are ${{ env.pr_count }} open pull requests."
         env:
           GITHUB_TOKEN: ${{ secrets.MY_PAT_TOKEN }}
 
       - name: Update Port Entity
-        run: |
-          REPO_NAME="${GITHUB_REPOSITORY#*/}"
-          BLUEPRINT_IDENTIFIER="repository"
-          OPEN_PR_COUNT="portapp"
-          
-          # Prepare JSON data
-          JSON_DATA=$(cat <<EOF
-          {
-            "identifier": "$REPO_NAME",
-            "title": "$REPO_NAME",
-            "properties": {
-              "open_pr_count": $PR_COUNT
-            },
-            "relations": {}
-          }
-          EOF
-          )
-
-          # Send request to Port
-          curl --request PATCH \
-               --url "https://api.getport.io/v1/blueprints/$BLUEPRINT_IDENTIFIER/entities/$OPEN_PR_COUNT" \
-               --header "Authorization: ${{ secrets.PORT_API_TOKEN }}" \
-               --header "Content-Type: application/json" \
-               --data "$JSON_DATA"
+      - uses: port-labs/port-github-action@v1
+        with:
+            clientId: ${{ secrets.CLIENT_ID }}
+            clientSecret: ${{ secrets.CLIENT_SECRET }}
+            operation: UPSERT
+            identifier: portapp
+            title: portapp
+            blueprint: repository
+            properties: |
+              {
+                "open_pr_count: {{ env.pr_count }}
+              }
         env:
           PR_COUNT: ${{ steps.count_prs.outputs.PR_COUNT }}
