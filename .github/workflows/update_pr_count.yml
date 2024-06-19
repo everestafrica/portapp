@@ -1,8 +1,9 @@
-name: Update Open PRs in matching repository entity 
+name: Update Open PRs in matching repository entity
+
 on:
   workflow_dispatch:  # Allow manual triggering
   schedule:
-    - cron: '* */6 * * *'  
+    - cron: '0 */6 * * *'  # Every 6 hours
 
 jobs:
   count-prs:
@@ -20,24 +21,23 @@ jobs:
       run: |
         pr_count=$(gh pr list --json number | jq '. | length')
         echo "pr_count=${pr_count}" >> $GITHUB_ENV
+        echo "::set-output name=pr_count::${pr_count}"
 
     - name: Use PR count
       run: echo "There are ${{ env.pr_count }} open pull requests."
       env:
-          GITHUB_TOKEN: ${{ secrets.MY_PAT_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.MY_PAT_TOKEN }}
 
     - name: Update Port Entity
-    - uses: port-labs/port-github-action@v1
+      uses: port-labs/port-github-action@v1
       with:
-          clientId: ${{ secrets.CLIENT_ID }}
-          clientSecret: ${{ secrets.CLIENT_SECRET }}
-          operation: UPSERT
-          identifier: portapp
-          title: portapp
-          blueprint: repository
-          properties: |
-              {
-                "open_pr_count: {{ env.pr_count }}
-              }
-      env:
-          PR_COUNT: ${{ steps.count_prs.outputs.PR_COUNT }}
+        clientId: ${{ secrets.CLIENT_ID }}
+        clientSecret: ${{ secrets.CLIENT_SECRET }}
+        operation: UPSERT
+        identifier: portapp
+        title: portapp
+        blueprint: repository
+        properties: |
+          {
+            "open_pr_count": "${{ steps.get-pr-count.outputs.pr_count }}"
+          }
