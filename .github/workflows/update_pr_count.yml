@@ -1,36 +1,39 @@
-name: Update Open PRs in Repository Entity
+name: Update Open PRs in matching repository entity
 
 on:
-  workflow_dispatch:
+  workflow_dispatch:  # Allow manual triggering
   schedule:
-    - cron: '0 */6 * * *'
+    - cron: '0 */6 * * *'  # Every 6 hours
 
 jobs:
-  update_repository_entity:
+  count-prs:
     runs-on: ubuntu-latest
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Setup jq
-      uses: mikefarah/jq@v1
-      with:
-        tokens: true
+    - name: Install jq
+      run: sudo apt-get install -y jq
 
     - name: Get PR count
-      id: get_pr_count
+      id: get-pr-count
       run: |
         pr_count=$(gh pr list --json number | jq '. | length')
-        echo "pr_count=$pr_count" >> $GITHUB_ENV
-        echo "::set-output name=pr_count::$pr_count"
+        echo "PR count: $pr_count"  # Debugging line to check pr_count
+        echo "pr_count=${pr_count}" >> $GITHUB_ENV
+        echo "::set-output name=pr_count::${pr_count}"
 
-    - name: Display PR count
-      run: echo "There are ${{ steps.get_pr_count.outputs.pr_count }} open pull requests."
+    - name: Use PR count
+      run: echo "There are ${{ steps.get-pr-count.outputs.pr_count }} open pull requests."
+      env:
+        GITHUB_TOKEN: ${{ secrets.MY_PAT_TOKEN }}
 
     - name: Construct JSON Properties
-      id: construct_json
+      id: construct-json
       run: |
-        pr_count=${{ steps.get_pr_count.outputs.pr_count }}
+        pr_count=${{ steps.get-pr-count.outputs.pr_count }}
+        echo "PR count in construct-json step: $pr_count"  # Debugging line to check pr_count
         properties=$(jq -n --arg pr_count "$pr_count" '{open_pr_count: $pr_count | tonumber}')
         echo "::set-output name=properties::$properties"
 
@@ -43,4 +46,4 @@ jobs:
         identifier: portapp
         title: portapp
         blueprint: repository
-        properties: ${{ steps.construct_json.outputs.properties }}
+        properties: ${{ steps.construct-json.outputs.properties }}
